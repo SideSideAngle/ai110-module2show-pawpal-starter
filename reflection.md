@@ -36,6 +36,8 @@ Asked AI if it notices any missing relationships or potential logic bottlenecks.
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+Greedy placement by priority instead of finding the best overall plan. A high priority 60 minute task is placed first at the preferred time of 8:00 even if there was another task with a hard preference at 8:00. Its still kinda reasonable because high priority still takes priority and there are probably more cases of high priority tasks than tasks that must be done at a certain time.
+
 ---
 
 ## 3. AI Collaboration

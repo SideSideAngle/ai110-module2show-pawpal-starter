@@ -92,6 +92,61 @@ Sample test output:
 | Conflict handling | | e.g., overlapping time slots |
 | Recurring tasks | | e.g., daily vs. weekly |
 
+def sort_by_time(tasks: list[Task]) -> list[Task]:
+        """Return a new list of tasks ordered by preferred time, earliest first.
+
+        Tasks with no preferred time go last. The input list is not modified, and
+        tasks with equal times keep their original relative order.
+        """
+        return sorted(tasks, key=time_sort_key)
+
+def filter_tasks(
+        self, pet_name: Optional[str] = None, status: str = "all"
+    ) -> list[tuple[Pet, Task]]:
+        """Tasks paired with their pet, optionally limited to one pet and/or a status.
+
+        `status` is "pending", "done" or "all". Raises ValueError for an unknown
+        status or pet name.
+        """
+        if status not in ("pending", "done", "all"):
+            raise ValueError("status must be one of ['pending', 'done', 'all']")
+        pets = [self._get_pet(pet_name)] if pet_name is not None else self.pets
+        return [
+            (pet, task)
+            for pet in pets
+            for task in pet.tasks
+            if status == "all" or task.completed == (status == "done")
+        ]
+
+ def conflict_with(self, pet: Pet, task: Task, start_time: int) -> Optional[str]:
+        """Check whether placing `task` at `start_time` would overlap the plan.
+
+        Returns a warning for the first overlapping item found, or None if the
+        slot is free. Read-only: nothing is added, so call it before add_item to
+        decide whether to proceed. Never raises. Linear in the number of items.
+        """
+        candidate = ScheduledItem(task, pet, start_time)
+        for item in self.items:
+            if item.start_time < candidate.end_time and candidate.start_time < item.end_time:
+                return self._describe_overlap(item, candidate)
+        return None
+
+ def next_occurrence(self) -> Optional[Task]:
+        """Return a fresh, pending copy due one period later, or None for a "once" task.
+
+        The next due date is counted from this task's due date (not today), so a
+        late completion doesn't shift the cadence.
+        """
+        days = RECURRENCE_DAYS.get(self.frequency)
+        if days is None:
+            return None
+        return replace(
+            self,
+            completed=False,
+            due_date=self.due_date + timedelta(days=days),
+            id=uuid4().hex,
+        )
+
 ## 📸 Demo Walkthrough
 
 Describe your app in numbered steps so a reader can follow along without watching a video:

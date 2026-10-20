@@ -161,3 +161,20 @@ Describe your app in numbered steps so a reader can follow along without watchin
 
 ## Implementation Summary (Phase 2: Step 4)
 So far, built the backend logic for Pawpal using the UML draft as a skeleton to start, filling in holes wherever needed like refinements and conflictions, etc. Also added tests which pass with no problems. Added a testing script in main.py to test the current implementations.
+
+## Testing PawPal+
+
+python -m pytest
+Tests cover wide variety of cases for conflicts, resolution, method functionality checking, all to ensure cases are handled cleanly.
+
+===================================================== test session starts ======================================================
+platform win32 -- Python 3.14.3, pytest-9.1.1, pluggy-1.7.0
+rootdir: C:\Users\Shahzaib\CodePath\ai110-module2show-pawpal-starter
+plugins: anyio-4.15.1
+collected 32 items                                                                                                              
+
+tests\test_pawpal.py ................................                                                                     [100%]
+
+====================================================== 32 passed in 0.16s ======================================================
+
+Confidence Level: 4

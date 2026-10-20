@@ -1,0 +1,69 @@
+classDiagram
+    %% All times are int minutes from midnight (e.g. 510 = 8:30 AM)
+    class Owner {
+        +str name
+        +int available_minutes
+        +int day_start
+        +int day_end
+        +dict preferences
+        +list~Pet~ pets
+        +add_pet(pet) None
+        +remove_pet(pet_name) None
+        +add_task(pet_name, task) None
+        +edit_task(pet_name, task_id, **changes) None
+        +remove_task(pet_name, task_id) None
+        +get_all_tasks() list~tuple~Pet, Task~~
+        +generate_schedule() Schedule
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +str notes
+        +list~Task~ tasks
+        +add_task(task) None
+        +remove_task(task_id) None
+        +get_pending_tasks() list~Task~
+    }
+
+    class Task {
+        +str id
+        +str title
+        +int duration_minutes
+        +str priority
+        +int preferred_time
+        +str frequency
+        +bool completed
+        +validate() None
+        +mark_complete() None
+        +reset() None
+        +priority_score() int
+    }
+
+    class Schedule {
+        +date day
+        +list~ScheduledItem~ items
+        +list~tuple~Pet, Task~~ unscheduled
+        +int total_minutes
+        +build(owner) None
+        +add_item(pet, task, start_time, reason) None
+        +explain() str
+    }
+
+    class ScheduledItem {
+        +Task task
+        +Pet pet
+        +int start_time
+        +int end_time
+        +str reason
+    }
+
+    Owner "1" *-- "0..*" Pet : owns
+    Pet "1" *-- "0..*" Task : has
+    Owner ..> Schedule : generates
+    Schedule "1" *-- "0..*" ScheduledItem : contains
+    Schedule ..> Pet : unscheduled pairs
+    Schedule ..> Task : unscheduled pairs
+    ScheduledItem --> Task
+    ScheduledItem --> Pet

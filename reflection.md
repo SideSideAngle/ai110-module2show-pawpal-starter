@@ -7,10 +7,20 @@
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+Add owner and pet info, users can add/edit tasks, generate daily schedule based on priorities and constraints
+
+Initial UML decision was having Pet, Owner, Task, and Schedule main objects, each with their own attributes and methods. For example, Pet has attributes name, species, related Tasks, and methods to add or remove tasks. Owner: name, preferences, methods for adding/removing pets and tasks, etc for Task and Schedule.
+
+Owner can have multiple pets, assign multiple tasks, and generate Schedule, Task can be applied to multiple pets, multiple pets can have multiple tasks, etc. 
+
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+
+AI suggested ScheduledItem as an additional object for additional clarity, which makes sense. One ScheduledItem can have a task, owner, pet, etc assigned to it.
+
+Asked AI if it notices any missing relationships or potential logic bottlenecks. Suggested fixing how time was represented and a better Task-to-Pet link because of how the rest of the code builds on them. Time is a string, better to change that. Task cannot tell which Pet it belongs to.
 
 ---
 

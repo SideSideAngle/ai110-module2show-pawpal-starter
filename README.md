@@ -56,6 +56,17 @@ Paste a sample of your app's CLI or Streamlit output here so a reader can see wh
 
 ## 🧪 Testing PawPal+
 
+Running main.py:
+==================================================
+Today's Schedule for Jordan
+==================================================
+Plan for 2026-10-19 (100 min scheduled):
+  08:00-08:10  Pixel: Breakfast [high] - scheduled at its preferred time
+  08:10-08:40  Mochi: Morning walk [high] - preferred time was taken, moved to the earliest free slot
+  08:40-09:05  Pixel: Play time [medium] - earliest free slot by priority
+  12:00-12:15  Pixel: Brush fur [low] - scheduled at its preferred time
+  17:30-17:50  Mochi: Training session [medium] - scheduled at its preferred time
+
 ```bash
 # Run the full test suite:
 pytest

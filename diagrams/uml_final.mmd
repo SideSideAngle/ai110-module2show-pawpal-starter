@@ -1,0 +1,99 @@
+classDiagram
+    %% All times are int minutes from midnight (e.g. 510 = 8:30 AM)
+    class Owner {
+        +str name
+        +int available_minutes
+        +int day_start
+        +int day_end
+        +dict preferences
+        +list~Pet~ pets
+        +add_pet(pet) None
+        +remove_pet(pet_name) None
+        +add_task(pet_name, task) None
+        +edit_task(pet_name, task_id, **changes) None
+        +complete_task(pet_name, task_id) Task
+        +remove_task(pet_name, task_id) None
+        +get_all_tasks() list~tuple~Pet, Task~~
+        +filter_tasks(pet_name, status) list~tuple~Pet, Task~~
+        +generate_schedule() Schedule
+        -_get_pet(pet_name) Pet
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +str notes
+        +list~Task~ tasks
+        +add_task(task) None
+        +remove_task(task_id) None
+        +get_task(task_id) Task
+        +complete_task(task_id) Task
+        +get_pending_tasks() list~Task~
+    }
+
+    class Task {
+        +str id
+        +str title
+        +int duration_minutes
+        +str priority
+        +int preferred_time
+        +str frequency
+        +bool completed
+        +date due_date
+        +validate() None
+        +mark_complete() None
+        +next_occurrence() Task
+        +reset() None
+        +priority_score() int
+    }
+
+    class Schedule {
+        +date day
+        +list~ScheduledItem~ items
+        +list~tuple~Pet, Task~~ unscheduled
+        +int total_minutes
+        +build(owner) None
+        +add_item(pet, task, start_time, reason) None
+        +find_conflicts() list~str~
+        +conflict_with(pet, task, start_time) str
+        +sort_by_time(tasks)$ list~Task~
+        +explain() str
+        -_describe_overlap(a, b)$ str
+        -_first_free(duration, earliest, latest_end) int
+        -_place(task, owner) tuple~int, str~
+    }
+
+    class ScheduledItem {
+        +Task task
+        +Pet pet
+        +int start_time
+        +str reason
+        +end_time() int
+    }
+
+    class module_functions {
+        <<module>>
+        +format_time(minutes) str
+        +time_sort_key(task) tuple
+    }
+
+    class StreamlitApp {
+        <<app.py>>
+        +PRIORITY_ICONS dict
+    }
+
+    Owner "1" *-- "0..*" Pet : owns
+    Pet "1" *-- "0..*" Task : has
+    Task ..> Task : next_occurrence creates
+    Owner ..> Schedule : generates
+    Schedule ..> Owner : build reads pets, hours, budget
+    Schedule "1" *-- "0..*" ScheduledItem : contains
+    Schedule ..> Pet : unscheduled pairs
+    Schedule ..> Task : unscheduled pairs
+    ScheduledItem --> Task
+    ScheduledItem --> Pet
+    Schedule ..> module_functions : uses time_sort_key, format_time
+    StreamlitApp ..> Owner : keeps in session_state
+    StreamlitApp ..> Schedule : find_conflicts, conflict_with, sort_by_time, explain
+    StreamlitApp ..> module_functions : format_time

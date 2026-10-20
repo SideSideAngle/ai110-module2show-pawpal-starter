@@ -1,8 +1,10 @@
 import streamlit as st
 
-from pawpal_system import Owner, Pet, Task, format_time, time_sort_key
+from pawpal_system import Owner, Pet, Schedule, Task, format_time
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
+
+PRIORITY_ICONS = {"high": "🔴", "medium": "🟡", "low": "🟢"}
 
 st.title("🐾 PawPal+")
 
@@ -101,17 +103,26 @@ else:
 
     if add_task_clicked:
         try:
-            owner.add_task(
-                target_pet,
-                Task(
-                    title=task_title.strip() or "Untitled task",
-                    duration_minutes=int(duration),
-                    priority=priority,
-                    preferred_time=preferred.hour * 60 + preferred.minute if use_preferred else None,
-                    frequency=frequency,
-                ),
+            new_task = Task(
+                title=task_title.strip() or "Untitled task",
+                duration_minutes=int(duration),
+                priority=priority,
+                preferred_time=preferred.hour * 60 + preferred.minute if use_preferred else None,
+                frequency=frequency,
             )
-            st.success(f"Added '{task_title}' to {target_pet}.")
+            # Check the slot against the current plan *before* adding, so the owner
+            # hears about a clash right away instead of after generating a schedule.
+            clash = None
+            if new_task.preferred_time is not None:
+                pet_obj = next(p for p in owner.pets if p.name == target_pet)
+                clash = owner.generate_schedule().conflict_with(pet_obj, new_task, new_task.preferred_time)
+            owner.add_task(target_pet, new_task)
+            st.success(f"Added '{new_task.title}' to {target_pet}.")
+            if clash:
+                st.warning(
+                    f"⚠️ {clash}\n\nThe task was still added. When you generate the schedule it will be "
+                    "moved to the next free slot, or change its preferred time to avoid the clash."
+                )
         except ValueError as err:
             st.error(str(err))
 
@@ -129,19 +140,23 @@ if owner.pets:
         status=filter_status,
     )
     if sort_choice == "Preferred time":
-        shown_tasks = sorted(shown_tasks, key=lambda pt: time_sort_key(pt[1]))
+        # Schedule.sort_by_time works on tasks, so map each sorted task back to its pet.
+        pet_of = {task.id: pet for pet, task in shown_tasks}
+        shown_tasks = [
+            (pet_of[t.id], t) for t in Schedule.sort_by_time([t for _, t in shown_tasks])
+        ]
 else:
     shown_tasks = []
 
 if shown_tasks:
-    st.write("Tasks:")
+    st.write(f"Tasks ({len(shown_tasks)}):")
     st.table(
         [
             {
                 "Pet": pet.name,
                 "Task": task.title,
                 "Minutes": task.duration_minutes,
-                "Priority": task.priority,
+                "Priority": f"{PRIORITY_ICONS[task.priority]} {task.priority}",
                 "Preferred": format_time(task.preferred_time) if task.preferred_time is not None else "-",
                 "Frequency": task.frequency,
             }
@@ -162,18 +177,58 @@ if st.button("Generate schedule"):
         st.warning("Add at least one task before generating a schedule.")
     else:
         schedule = owner.generate_schedule()
-        st.success(f"Scheduled {len(schedule.items)} task(s), {schedule.total_minutes} minutes in total.")
+        conflicts = schedule.find_conflicts()
+        moved = [i for i in schedule.items if "moved" in i.reason]
+
+        # Headline status: green only when the plan is clean.
+        if conflicts or schedule.unscheduled:
+            st.warning(
+                f"Scheduled {len(schedule.items)} task(s) ({schedule.total_minutes} min), "
+                "but some need your attention below."
+            )
+        else:
+            st.success(f"All set! {len(schedule.items)} task(s) scheduled, {schedule.total_minutes} minutes in total.")
+
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Scheduled", len(schedule.items))
+        m2.metric("Minutes planned", schedule.total_minutes)
+        m3.metric("Couldn't fit", len(schedule.unscheduled))
+
         st.table(
             [
                 {
                     "Time": f"{format_time(i.start_time)}-{format_time(i.end_time)}",
                     "Pet": i.pet.name,
                     "Task": i.task.title,
-                    "Priority": i.task.priority,
+                    "Priority": f"{PRIORITY_ICONS[i.task.priority]} {i.task.priority}",
                     "Why": i.reason,
                 }
                 for i in schedule.items
             ]
         )
+
+        # Overlaps: say who/what/when, and what the owner can do about it.
+        if conflicts:
+            st.error(f"{len(conflicts)} scheduling conflict(s) found")
+            for warning in conflicts:
+                st.warning(warning, icon="⚠️")
+            st.caption("Fix: change one task's preferred time or duration, then generate again.")
+
+        # Not conflicts, but the owner's requested time wasn't honoured, so say so.
+        for item in moved:
+            st.info(
+                f"{item.pet.name}'s '{item.task.title}' wanted "
+                f"{format_time(item.task.preferred_time)} but that slot was taken; "
+                f"it was moved to {format_time(item.start_time)}.",
+                icon="🔀",
+            )
+
         for pet, task in schedule.unscheduled:
-            st.warning(f"Could not fit {pet.name}'s '{task.title}' ({task.duration_minutes} min).")
+            st.warning(
+                f"Could not fit {pet.name}'s '{task.title}' ({task.duration_minutes} min). "
+                "Shorten it, lower other tasks' durations, or widen the day.",
+                icon="⏳",
+            )
+
+        with st.expander("Plan explained"):
+            st.text(schedule.explain())

@@ -69,11 +69,19 @@ Read through them, asked questions, and decided on ones which were more importan
 **a. What you tested**
 
 - What behaviors did you test?
+
+Numerous behaviors pertaining to task basics, recurring tasks, conflict detection, sorting and schedule building.
+Some tests were auto added by the AI when, for a few prompts, I realized my Claude was set to Auto when I usually have it set to Manual. So some very specific features got tested.
+
 - Why were these tests important?
+They cover the main parts of the app, the parts which could cause errors.
 
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
+
+Pretty confident
+
 - What edge cases would you test next if you had more time?
 
 ---
@@ -84,10 +92,16 @@ Read through them, asked questions, and decided on ones which were more importan
 
 - What part of this project are you most satisfied with?
 
+Was interesting and fun again to be messing around with AI assisted coding. Satisfied with the detailed work which was done.
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
 
+Probably the tests, definitely a little too many tests for the scope of this project. More effort towards refining the UML. 
+
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+Structure, planning, prerequisites to starting, repeating certain tasks during development.

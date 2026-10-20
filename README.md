@@ -22,6 +22,19 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Features
+
+- **Multi-pet care tracking:** one owner, any number of pets, each with its own tasks.
+- **Task details:** duration, priority (low/medium/high), optional preferred time, and frequency (once/daily/weekly), validated when created.
+- **Priority-based scheduling:** highest priority is placed first; ties go to the earlier preferred time, then the shorter task.
+- **Preferred times honoured:** a task gets its preferred time if that slot is free. Otherwise it moves to the earliest free slot within the owner's day.
+- **Time budget:** tasks that exceed the owner's available minutes or don't fit the day are listed as unscheduled instead of being dropped silently.
+- **Sorting and filtering:** sort tasks by preferred time (tasks with none go last); filter by pet and by pending/done/all.
+- **Conflict detection:** warns about overlapping tasks, labelled as same-pet or between pets, and checks a new task's time against the plan as it is added.
+- **Recurring tasks:** completing a daily or weekly task creates the next occurrence, counted from its due date.
+- **Explained plans:** every scheduled task carries a reason, and the plan can be printed as readable text.
+- **Tests:** an automated pytest suite covers the scheduling behaviour.
+
 ## Getting started
 
 ### Setup
@@ -149,13 +162,23 @@ def filter_tasks(
 
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+Start the app with `streamlit run app.py`. The page is one scrolling screen, top to bottom:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+**Main UI features**
+
+- **Owner:** a text box for the owner's name. Everything you enter is kept for the session, so it survives Streamlit's reruns.
+- **Add a Pet:** a form for name, species (dog, cat, other) and age. A table of your pets (with task counts) updates below it. Duplicate or blank names are rejected with an error message.
+- **Add a Task:** pick a pet, then set a title, duration (1-240 min), priority (low, medium, high), an optional preferred time and a frequency (once, daily, weekly). If the preferred time clashes with the current plan, you get a warning right away.
+- **Task list:** filter by pet and by status (pending, done, all), and sort by added order or preferred time. Priorities are marked 🔴 high, 🟡 medium, 🟢 low.
+- **Build Schedule:** the "Generate schedule" button builds one plan across all pets. You see a summary banner, metrics (scheduled, minutes planned, couldn't fit), a time-ordered table with a "Why" column, any warnings, and a "Plan explained" expander.
+
+**Example workflow**
+
+1. **Add a pet.** In "Add a Pet", enter `Mochi`, choose `dog`, set age 3 and click *Add pet*. Mochi appears in the pets table. Add a second pet, `Pixel` the cat, the same way.
+2. **Add tasks.** In "Add a Task", choose Mochi and enter "Morning walk", 30 minutes, high priority. Tick *Set a preferred time* and set 08:00. Click *Add task*. Then add "Breakfast" for Pixel (10 min, high, preferred 08:00). If you see a warning about 08:00 already being taken, the task was still added.
+3. **Review the tasks.** Set *Sort by* to "Preferred time" and *Show pet* to a single pet to check what you entered. Tasks without a preferred time are listed last.
+4. **Generate today's schedule.** Click *Generate schedule*. The table lists each task with its start-end time, pet, priority and the reason it was placed there, for example "scheduled at its preferred time" or "preferred time was taken, moved to the earliest free slot".
+5. **Read the warnings.** A blue note says if a task was moved from the time you asked for. A yellow warning says if a task didn't fit in the day. A red conflict count (with the details) appears if two tasks overlap. Adjust a task's time or duration, add it again if needed, and regenerate.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
 

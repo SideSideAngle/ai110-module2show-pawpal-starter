@@ -43,12 +43,22 @@ Asked AI if it notices any missing relationships or potential logic bottlenecks.
 **a. How you used AI**
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+
+Started off in Plan mode to brainstorm the initial structure. Made refinements or suggestions as it went on and asked questions whenever needed for explanations or why the AI did something extra. 
+
 - What kinds of prompts or questions were most helpful?
+
+Asking the AI to explain was the biggest one. AI proposed suggestions, noticed possible problems, and asking about them helped me put into perspective the thinking of the AI and decide if its a worthwhile addition, extra, or not needed at all.
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
+
+When I asked it to analyze the UML skeleton, it proposed a number of possible issues, as part of what to ask for the project. Proposed implenting checks or fixes for all of them.
+
 - How did you evaluate or verify what the AI suggested?
+
+Read through them, asked questions, and decided on ones which were more important than others or some which were a bit extra for the scope of the project.
 
 ---
 
